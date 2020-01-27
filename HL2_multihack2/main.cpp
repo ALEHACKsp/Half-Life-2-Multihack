@@ -2,6 +2,8 @@
 #include "phook.h"
 #include "hack.h"
 #include "colors.h"
+#define IMGUI_WINDOW_W 400
+#define IMGUI_WINDOW_H 440
 
 HWND window;
 void* pDevice[119];
@@ -17,6 +19,7 @@ void InitImGui(LPDIRECT3DDEVICE9 device)
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags = ImGuiConfigFlags_NoMouseCursorChange;
 	ImGuiStyle& style = ImGui::GetStyle();
+	style.WindowMinSize = ImVec2(IMGUI_WINDOW_W, IMGUI_WINDOW_H);
 	ImVec4* colors = style.Colors;
 	colors[ImGuiCol_Text] = COLOR_WHITE;
 	colors[ImGuiCol_WindowBg] = COLOR_BLACK;
@@ -31,6 +34,9 @@ void InitImGui(LPDIRECT3DDEVICE9 device)
 	colors[ImGuiCol_FrameBgActive] = COLOR_GRAY;
 	colors[ImGuiCol_SliderGrab] = COLOR_ORANGE;
 	colors[ImGuiCol_SliderGrabActive] = COLOR_LIGHT_ORANGE;
+	colors[ImGuiCol_Button] = COLOR_DARK_ORANGE;
+	colors[ImGuiCol_ButtonHovered] = COLOR_ORANGE;
+	colors[ImGuiCol_ButtonActive] = COLOR_LIGHT_ORANGE;
 	colors[ImGuiCol_Border] = COLOR_ORANGE;
 	ImGui_ImplWin32_Init(window);
 	ImGui_ImplDX9_Init(device);
