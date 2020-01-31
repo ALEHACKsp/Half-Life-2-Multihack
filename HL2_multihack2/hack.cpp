@@ -15,6 +15,7 @@ bool detach;
 //Data
 
 PTR Game::client;
+PTR Game::tier0;
 PTR Game::engine;
 PTR Game::server;
 PTR Game::shaderapi;
@@ -30,6 +31,8 @@ char Game::oDecAmmo4[2];
 char Game::oDecAmmo5[2];
 char Game::oVPunch[4];
 char Game::oHPunch[5];
+ConMsg Game::oConMsg;
+ConColorMsg Game::oConColorMsg;
 DWORD* rDrawOtherModels;
 DWORD* FOV;
 float* DuckTime;
@@ -99,13 +102,13 @@ void Hack::DrawMenu()
 		if (ImGui::Checkbox("No Visual Punch", &no_punch))
 			NoViewPunch();
 		ImGui::Checkbox("Enable FOV Changer", &fov_changer);
-		ImGui::SliderInt("FOV (default: 90)", &fovVal, 0, 90);
+		ImGui::SliderInt("FOV (causing crashes, default: 90)", &fovVal, 0, 90);
 		ImGui::EndTabItem();
 	}
 
 	if (ImGui::BeginTabItem("Visual Teleport"))
 	{
-		if(Game::localPlayerAddr != NULL)
+		if(pos != nullptr)
 			ImGui::Text("Current Position: (%f, %f, %f)", pos->x, pos->y, pos->z);
 		ImGui::InputFloat("Position X", &teleportPos.x);
 		ImGui::InputFloat("Position Y", &teleportPos.y);
@@ -147,6 +150,7 @@ void Hack::DrawMenu()
 DWORD WINAPI Hack::Main(LPVOID lpReserved)
 {
 	Game::client = (PTR)GetModuleHandle("client.dll");
+	Game::tier0 = (PTR)GetModuleHandle("tier0.dll");
 	Game::engine = (PTR)GetModuleHandle("engine.dll");
 	Game::server = (PTR)GetModuleHandle("server.dll");
 	Game::shaderapi = (PTR)GetModuleHandle("shaderapidx9.dll");
@@ -157,11 +161,28 @@ DWORD WINAPI Hack::Main(LPVOID lpReserved)
 	memcpy(&Game::oDecAmmo5, reinterpret_cast<char*>(Game::server + HL2::fDecAmmo5), 2);
 	memcpy(&Game::oVPunch, reinterpret_cast<char*>(Game::server + HL2::fVPunch), 4);
 	memcpy(&Game::oHPunch, reinterpret_cast<char*>(Game::server + HL2::fHPunch), 5);
+	Game::oConMsg = (ConMsg)(Game::tier0 + HL2::fConMsg);
+	Game::oConColorMsg = (ConColorMsg)(Game::tier0 + HL2::fConColorMsg);
 	crosshair.size.x = 1;
 	crosshair.size.y = 11;
 	crosshair.color[0] = 1.f;
 	crosshair.color[1] = 0.5f;
 	crosshair.color[2] = 0.f;
+
+	//--Console Msg--
+	int emptyLines = 22;
+	Color orange = Color(255, 120, 0, 255);
+	Color red = Color(255, 0, 0, 255);
+	for(int i = 0; i < emptyLines; i++)
+		Game::oConMsg((char*)"\n");
+
+	Game::oConColorMsg(&orange, (char*)" Half-Life: 2 - Multihack\n");
+	Game::oConColorMsg(&red, (char*)"\t by rdbo");
+
+	for (int i = 0; i < emptyLines; i++)
+		Game::oConMsg((char*)"\n");
+	//---------------
+
 	bool init_vars = false;
 	while (!detach)
 	{
@@ -172,6 +193,8 @@ DWORD WINAPI Hack::Main(LPVOID lpReserved)
 			Game::localPlayerAddr = *(PTR*)(Game::server + HL2::dwLocalPlayer);
 			if (Game::localPlayerAddr != NULL)
 			{
+				Game::localPlayer = (Player*)(Game::localPlayerAddr);
+
 				//vars
 
 				rDrawOtherModels != (DWORD*)(Game::client + HL2::r_drawothermodels) ?
@@ -186,9 +209,7 @@ DWORD WINAPI Hack::Main(LPVOID lpReserved)
 					pos = (VecPos*)((*(DWORD*)(Game::engine + HL2::dwPosBase)) + HL2::flPos) : 0;
 
 				//Cheats
-
 				showCrosshair = (bool*)(Game::client + HL2::bShowCrosshair);
-				Game::localPlayer = (Player*)(Game::localPlayerAddr);
 				triggerbot&& Game::localPlayer->OnTarget == true ? ForceAttack() : void();
 				inf_health && Game::localPlayer->Health < MAX_HEALTH ? SetPlayerHealth(MAX_HEALTH) : void();
 				inf_armor && Game::localPlayer->Armor < MAX_ARMOR ? SetPlayerArmor(MAX_ARMOR) : void();

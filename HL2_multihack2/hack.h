@@ -1,5 +1,6 @@
 #pragma once
 #include "includes.h"
+#include "colors.h"
 #define MAX_HEALTH 100
 #define MAX_ARMOR 100
 #define MAX_AUX 100
@@ -7,6 +8,9 @@
 
 #define KEY_MENU VK_INSERT
 #define KEY_BHOP VK_SPACE
+
+typedef void(__cdecl* ConMsg)(char* msg);
+typedef void (__cdecl* ConColorMsg)(Color* color, char* msg);
 
 extern bool showMenu;
 extern UINT KeyHook[0xFE];
@@ -34,6 +38,9 @@ namespace HL2
 	const PTR dwForceAttack = 0x48BF68;
 	const PTR bShowCrosshair = 0x489608;
 	const PTR r_drawothermodels = 0x45AF90;
+	//tier0.dll
+	const PTR fConMsg = 0x3A70;
+	const PTR fConColorMsg = 0x38F0;
 	//engine.dll
 	const PTR dwFovBase = 0x446E7C;
 	const PTR dwFov = 0x1048;
@@ -93,6 +100,7 @@ public:
 namespace Game
 {
 	extern PTR client;
+	extern PTR tier0;
 	extern PTR engine;
 	extern PTR server;
 	extern PTR shaderapi;
@@ -106,4 +114,6 @@ namespace Game
 	extern char oDecAmmo5[2];
 	extern char oVPunch[4];
 	extern char oHPunch[5];
+	extern ConMsg oConMsg;
+	extern ConColorMsg oConColorMsg;
 }

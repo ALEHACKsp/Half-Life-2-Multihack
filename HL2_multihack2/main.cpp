@@ -81,8 +81,8 @@ LRESULT __stdcall PHook::WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPAR
 	}
 	if (showMenu)
 	{
-		ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam);
-		return true;
+		if(ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam))
+			return true;
 	}
 
 	return CallWindowProc(oWndProc, hWnd, uMsg, wParam, lParam);
