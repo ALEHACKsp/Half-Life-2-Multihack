@@ -101,7 +101,7 @@ void Hack::DrawMenu()
 		ImGui::Checkbox("Wireframe", &wireframe);
 		if (ImGui::Checkbox("No Visual Punch", &no_punch))
 			NoViewPunch();
-		ImGui::Checkbox("Enable FOV Changer", &fov_changer);
+		ImGui::Checkbox("Enable FOV Changer (causing crashes)", &fov_changer);
 		ImGui::SliderInt("FOV (causing crashes, default: 90)", &fovVal, 0, 90);
 		ImGui::EndTabItem();
 	}
